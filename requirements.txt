@@ -3,3 +3,5 @@ cryptography~=43.0.0
 onnxruntime~=1.20.0
 opencv-python~=4.10.0.84
 numpy~=2.1.0
+fastapi
+uvicorn
