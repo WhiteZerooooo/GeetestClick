@@ -3,6 +3,7 @@ import json
 import math
 import random
 import time
+import re
 
 import httpx
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
@@ -17,7 +18,7 @@ class Crack:
         self.c = None
         self.session = httpx.Client(http2=True)
         self.session.headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+            "User-Agent": "x"
         }
         # self.session.verify = False
         self.gt = gt
@@ -35,7 +36,7 @@ Bm1Zzu+l8nSOqAurgQIDAQAB
             self.mouse_path = json.loads(f.read())
 
     def get_type(self) -> dict:
-        url = f"https://api.geetest.com/gettype.php?gt={self.gt}"
+        url = f"https://api.geetest.com/ajax.php?gt={self.gt}&challenge={self.challenge}&lang=zh-cn&pt=0&client_type=web"
         res = self.session.get(url)
         return json.loads(res.text[1:-1])["data"]
 
@@ -321,131 +322,18 @@ Bm1Zzu+l8nSOqAurgQIDAQAB
         return ct
 
     def get_c_s(self):
-        o = {
-            "gt": self.gt,
-            "challenge": self.challenge,
-            "offline": False,
-            "new_captcha": True,
-            "product": "embed",
-            "width": "300px",
-            "https": True,
-            "protocol": "https://",
-        }
-        o.update(self.get_type())
-        o.update({
-            "cc": 16,
-            "ww": True,
-            "i": "-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1!!-1"
-        })
-        o = json.dumps(o, separators=(',', ':'))
-        # print(o)
-        ct = self.aes_encrypt(o)
-        s = []
-        for byte in ct:
-            s.append(byte)
-        i = self.encode(s)
-        r = self.enc_key
-        w = i + r
-        params = {
-            "gt": self.gt,
-            "challenge": self.challenge,
-            "lang": "zh-cn",
-            "pt": 0,
-            "client_type": "web",
-            "callback": "geetest_" + str(int(round(time.time() * 1000))),
-            "w": w
-        }
-        resp = self.session.get("https://api.geetest.com/get.php", params=params).text
-        # print(resp)
-        data = json.loads(resp[22:-1])["data"]
-        self.c = data["c"]
-        self.s = data["s"]
-        return data["c"], data["s"]
-
-    def gettype(self):
-        url = f"https://api.geetest.com/gettype.php?gt={self.gt}&callback=geetest_{str(int(round(time.time() * 1000)))}"
-        return self.session.get(url).text
-
-    def ajax(self):
-        def transform(e, t, n):
-            if not t or not n:
-                return e
-            o = 0
-            i = list(e)
-            s = t[0]
-            a = t[2]
-            b = t[4]
-            while o < len(n):
-                r = n[o:o + 2]
-                o += 2
-                c = int(r, 16)
-                l = chr(c)
-                u = (s * c * c + a * c + b) % len(i)
-                i.insert(u, l)
-            return ''.join(i)
-
-        mouse_path = [
-            ["move", 385, 313, 1724572150164, "pointermove"],
-            ["move", 385, 315, 1724572150166, "pointermove"],
-            ["move", 386, 315, 1724572150174, "pointermove"],
-            ["move", 387, 315, 1724572150182, "pointermove"],
-            ["move", 387, 316, 1724572150188, "pointermove"],
-            ["move", 388, 316, 1724572150204, "pointermove"],
-            ["move", 388, 317, 1724572150218, "pointermove"],
-            ["down", 388, 317, 1724572150586, "pointerdown"],
-            ["focus", 1724572150587],
-            ["up", 388, 317, 1724572150632, "pointerup"]
-        ]
-        tt = transform(self.encode_mouse_path(mouse_path, self.c, self.s), self.c, self.s)
-        rp = self.MD5(self.gt + self.challenge + self.s)
-        temp1 = '''"lang":"zh-cn","type":"fullpage","tt":"%s","light":"DIV_0","s":"c7c3e21112fe4f741921cb3e4ff9f7cb","h":"321f9af1e098233dbd03f250fd2b5e21","hh":"39bd9cad9e425c3a8f51610fd506e3b3","hi":"09eb21b3ae9542a9bc1e8b63b3d9a467","vip_order":-1,"ct":-1,"ep":{"v":"9.1.9-dbjg5z","te":false,"me":true,"ven":"Google Inc. (Intel)","ren":"ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x0000A7A0) Direct3D11 vs_5_0 ps_5_0, D3D11)","fp":["scroll",0,1602,1724571628498,null],"lp":["up",386,217,1724571629854,"pointerup"],"em":{"ph":0,"cp":0,"ek":"11","wd":1,"nt":0,"si":0,"sc":0},"tm":{"a":1724571567311,"b":1724571567549,"c":1724571567562,"d":0,"e":0,"f":1724571567312,"g":1724571567312,"h":1724571567312,"i":1724571567317,"j":1724571567423,"k":1724571567330,"l":1724571567423,"m":1724571567545,"n":1724571567547,"o":1724571567569,"p":1724571568259,"q":1724571568259,"r":1724571568261,"s":1724571570378,"t":1724571570378,"u":1724571570380},"dnf":"dnf","by":0},"passtime":1600,"rp":"%s",''' % (
-            tt, rp)
-        r = "{" + temp1 + '"captcha_token":"1198034057","du6o":"eyjf7nne"}'
-        # print(r)
-        ct = self.aes_encrypt(r)
-        s = [byte for byte in ct]
-        w = self.encode(s)
-        params = {
-            "gt": self.gt,
-            "challenge": self.challenge,
-            "lang": "zh-cn",
-            "pt": 0,
-            "client_type": "web",
-            "callback": "geetest_" + str(int(round(time.time() * 1000))),
-            "w": w
-        }
-        resp = self.session.get("https://api.geetest.com/ajax.php", params=params).text
-        return json.loads(resp[22:-1])["data"]
+        res = self.session.get(f"https://api.geetest.com/get.php?is_next=true&type=click&gt={self.gt}&challenge={self.challenge}&lang=zh-cn&https=false&protocol=https://&offline=false&product=embed&api_server=api.geetest.com&isPC=true&autoReset=true&width=100%25&callback=geetest_{int(time.time() * 1000)}")
+        data = json.loads(re.search(r'geetest_\d+\((.*)\)', res.text, re.DOTALL).group(1))
+        pic = data["data"]['pic']
+        c = data["data"]['c']
+        s = data["data"]['s']
+        self.pic_path = pic
+        self.c = c
+        self.s = s
+        return c, s
 
     def get_pic(self,retry=0):
-        params = {
-            "type": "click",
-            "gt": self.gt,
-            "challenge": self.challenge,
-            "lang": "zh-cn",
-            "callback": "geetest_" + str(int(round(time.time() * 1000))),
-        }
-        if retry == 0:
-            url = "https://api.geevisit.com/get.php"
-            params.update(
-                {
-                    "is_next": "true",
-                    "https": "true",
-                    "protocol": "https://",
-                    "offline": "false",
-                    "product": "float",
-                    "api_server": "api.geevisit.com",
-                    "isPC": True,
-                    "autoReset": True,
-                    "width": "100%",
-                }
-            )
-        else:
-            url = "https://api.geetest.com/refresh.php"
-        resp = self.session.get(url, params=params).text
-        data = json.loads(resp[22:-1])["data"]
-        self.pic_path = data["pic"]
-        pic_url = "https://" + data["image_servers"][0][:-1] + data["pic"]
+        pic_url = "https://static.geetest.com" + self.pic_path
         return self.session.get(pic_url).content
 
     def verify(self, points: list):

@@ -27,29 +27,15 @@ async def verify(gt: str, challenge: str):
     try:
         # 初始化破解器
         crack = Crack(gt, challenge)
-
-        # 获取验证类型
-        crack.gettype()
-
-        # 获取c和s参数
+        crack.get_type()
         crack.get_c_s()
-
-        # 等待0.5秒
         time.sleep(0.5)
-
-        # 发送ajax请求
-        crack.ajax()
-
         model = Model()
 
         for retry in range(6):
             # 获取验证码图片
             pic_content = crack.get_pic(retry)
-
-            # 检测图片
             small_img, big_img = model.detect(pic_content)
-
-            # 文字配对
             result_list = model.siamese(small_img, big_img)
             
             point_list = []
@@ -59,12 +45,14 @@ async def verify(gt: str, challenge: str):
                 point_list.append(f"{left}_{top}")
 
             # 验证结果
-            result = json.loads(crack.verify(point_list))
-            
-            if result["data"]["result"] == "success":
-                result_data["success"] = True
-                result_data["data"] = result["data"]
-                break
+            # result = json.loads(crack.verify(point_list))
+
+            result_data["success"] = True
+            result_data["codes"] = point_list
+            result_data["c"] = crack.c
+            result_data["s"] = crack.s
+            result_data["pic"] = crack.pic_path
+            break
 
     except Exception as e:
         result_data["message"] = str(e)

@@ -16,7 +16,7 @@ print(time.time() - tt)
 crack = Crack(reg["gt"], reg["challenge"])
 
 tt = time.time()
-crack.gettype()
+crack.get_type()
 print(time.time() - tt)
 
 tt = time.time()
@@ -24,10 +24,6 @@ crack.get_c_s()
 print(time.time() - tt)
 
 time.sleep(0.5)
-
-tt = time.time()
-crack.ajax()
-print(time.time() - tt)
 
 model = Model()
 
@@ -53,10 +49,11 @@ for retry in range(6):
     wait_time = 2.0 - (time.time() - ttt)
     time.sleep(wait_time)
     tt = time.time()
-    result = json.loads(crack.verify(point_list))
-    print(result)
-    print(time.time() - tt)
-    if result["data"]["result"] == "success":
-        break
+    print(point_list)
+    # result = json.loads(crack.verify(point_list))
+    # print(result)
+    # print(time.time() - tt)
+    # if result["data"]["result"] == "success":
+    #     break
 total_time = time.time() - t
 print(f"总计耗时(含等待{wait_time}s): {total_time}")
